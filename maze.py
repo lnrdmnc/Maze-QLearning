@@ -34,6 +34,20 @@ class Agent:
     def __repr__(self):
         return str(self.loc)
     
+    def draw(self, TILE_SIZE):
+        x = self.j * TILE_SIZE
+        y = self.i * TILE_SIZE
+        z = TILE_SIZE / 2  # Altezza del giocatore sopra il pavimento
+
+        # Disegna il giocatore come un cubo
+        glBegin(GL_QUADS)
+        glColor3fv((1, 0, 0))  # Colore del giocatore (rosso)
+        glVertex3fv((x, y, z))
+        glVertex3fv((x + TILE_SIZE, y, z))
+        glVertex3fv((x + TILE_SIZE, y + TILE_SIZE, z))
+        glVertex3fv((x, y + TILE_SIZE, z))
+        glEnd()
+    
 
 
 class Maze:
@@ -92,38 +106,63 @@ def make_test_maze(rows,columns):
     return m
 
 def draw(TILE_SIZE, player, tiles, maze):
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    pygame.init()
+    display = (800, 600)
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+    glTranslatef(-TILE_SIZE * len(maze.env[0]) / 2, -TILE_SIZE * len(maze.env) / 2, -TILE_SIZE * len(maze.env))
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        glRotatef(1, 3, 1, 1)
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        draw_maze(TILE_SIZE, tiles, maze)
+        player.draw(TILE_SIZE)  # Chiamiamo ora il metodo draw del giocatore
+
+        pygame.display.flip()
+        pygame.time.wait(10)
+
+def draw_maze(TILE_SIZE, tiles, maze):
+    default_texture = "C:\\Users\\Leonardo\\Desktop\\Maze-QLearning\\texture\\coral_stone_wall_diff_1k.jpg"
+
+      # Sostituisci con il percorso della tua texture predefinita
 
     for row in range(len(maze.env)):
         for column in range(len(maze.env[row])):
             x = column * TILE_SIZE
             y = row * TILE_SIZE
-            z = 0  # Altezza base per il pavimento
-            tile = tiles[maze.env[row][column]]
+            z = 0
+            texture_key = maze.env[row][column]
+
+            if texture_key in tiles:
+                tile_texture = tiles[texture_key]
+            else:
+                tile_texture = default_texture
 
             glBegin(GL_QUADS)
-            glColor3fv((1, 1, 1))  # Colore del pavimento
+            glColor3fv((1, 1, 1))
             glVertex3fv((x, y, z))
             glVertex3fv((x + TILE_SIZE, y, z))
             glVertex3fv((x + TILE_SIZE, y + TILE_SIZE, z))
             glVertex3fv((x, y + TILE_SIZE, z))
             glEnd()
 
-            if maze.env[row][column] == 1:  # Sostituisci 1 con il tuo valore per le pareti
-                # Disegna le pareti in alto
+            if maze.env[row][column] == 1:
                 glBegin(GL_QUADS)
-                glColor3fv((0, 0, 1))  # Colore delle pareti
+                glColor3fv((0, 0, 1))
                 glVertex3fv((x, y, z + TILE_SIZE))
                 glVertex3fv((x + TILE_SIZE, y, z + TILE_SIZE))
                 glVertex3fv((x + TILE_SIZE, y + TILE_SIZE, z + TILE_SIZE))
                 glVertex3fv((x, y + TILE_SIZE, z + TILE_SIZE))
                 glEnd()
 
-    # Aggiungi qui il disegno del giocatore
-    player.draw()
-
     pygame.display.flip()
-    pygame.time.wait(10)  # Aggiungi un ritardo per controllare il frame rate
+
 
          
 def main():
@@ -137,6 +176,23 @@ def main():
     print(f'punteggio finale {final_score}')
     
 
-if __name__== '__main__':
-    main()
+if __name__ == '__main__':
+    m = make_test_maze(4, 4)
+    final_score = 0
+
+    # Configurazione del giocatore
+    player = Agent()
+
+    # Configurazione delle texture per il pavimento e le pareti
+    tiles = {
+    0: r"C:\Users\Leonardo\Desktop\Maze-QLearning\texture\coral_stone_wall_diff_1k.jpg",
+    1: r"C:\Users\Leonardo\Desktop\Maze-QLearning\texture\coral_stone_wall_diff_1k.jpg"
+    }
+
+    # Dimensione di ogni cella nel labirinto
+    TILE_SIZE = 40
+
+    # Chiamata alla funzione draw
+    draw(TILE_SIZE, player, tiles, m)
+
    
