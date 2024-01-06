@@ -1,0 +1,3 @@
+pip install numpy
+pip install PyOpenGl 
+pip install PyOpenGL pygame

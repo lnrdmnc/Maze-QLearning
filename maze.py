@@ -1,8 +1,10 @@
 import numpy as np
 from collections import namedtuple
 import random
-#from threeviz.api import plot_3d, plot_pose, plot_line_seg
-
+import pygame
+from pygame.locals import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
 """ 
 
 States 
@@ -88,6 +90,41 @@ def make_test_maze(rows,columns):
     e[1, 2:]= -1
     e[3, 0:2]= -1
     return m
+
+def draw(TILE_SIZE, player, tiles, maze):
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    for row in range(len(maze.env)):
+        for column in range(len(maze.env[row])):
+            x = column * TILE_SIZE
+            y = row * TILE_SIZE
+            z = 0  # Altezza base per il pavimento
+            tile = tiles[maze.env[row][column]]
+
+            glBegin(GL_QUADS)
+            glColor3fv((1, 1, 1))  # Colore del pavimento
+            glVertex3fv((x, y, z))
+            glVertex3fv((x + TILE_SIZE, y, z))
+            glVertex3fv((x + TILE_SIZE, y + TILE_SIZE, z))
+            glVertex3fv((x, y + TILE_SIZE, z))
+            glEnd()
+
+            if maze.env[row][column] == 1:  # Sostituisci 1 con il tuo valore per le pareti
+                # Disegna le pareti in alto
+                glBegin(GL_QUADS)
+                glColor3fv((0, 0, 1))  # Colore delle pareti
+                glVertex3fv((x, y, z + TILE_SIZE))
+                glVertex3fv((x + TILE_SIZE, y, z + TILE_SIZE))
+                glVertex3fv((x + TILE_SIZE, y + TILE_SIZE, z + TILE_SIZE))
+                glVertex3fv((x, y + TILE_SIZE, z + TILE_SIZE))
+                glEnd()
+
+    # Aggiungi qui il disegno del giocatore
+    player.draw()
+
+    pygame.display.flip()
+    pygame.time.wait(10)  # Aggiungi un ritardo per controllare il frame rate
+
          
 def main():
     m=make_test_maze(4,4)
