@@ -7,6 +7,7 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 from collections import deque
 
+
 # Dimensioni ridotte per una visualizzazione più chiara
 DIMENSIONI = 5
 DIMENSIONI_CELLA = 100  # Dimensione maggiore per cella per una migliore visualizzazione
